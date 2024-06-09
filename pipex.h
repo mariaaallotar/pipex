@@ -17,7 +17,8 @@ typedef struct s_pipex
 {
 	int		pipe_fds[2];
 	pid_t	pid;			//PID of child (in parent)
-	char	*path;
+	char	*path;			//needs to be freed
+	char	*command_w_flags;
 	char	*command;
 	char	*envp[];
 }	t_pipex;
