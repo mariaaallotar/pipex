@@ -13,12 +13,18 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
+# include <stdlib.h>
+# include <unistd.h>
+# include "libft/libft.h"
+
+char	**mod_split(char const *s, char c, char except);
+
 typedef struct s_pipex
 {
 	int		pipe_fds[2];
 	pid_t	pid;			//PID of child (in parent)
 	char	*path;			//needs to be freed
-	char	*command_w_flags;
+	char	**command_w_flags;
 	char	*command;
 	char	*envp[];
 }	t_pipex;

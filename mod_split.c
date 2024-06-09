@@ -1,10 +1,23 @@
-//remember to add 42 header
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   mod_split.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/09 12:23:59 by maheleni          #+#    #+#             */
+/*   Updated: 2024/06/09 12:24:02 by maheleni         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "pipex.h"
 
 /**
 * Counts the amount of substrings in the string 's'
 * Parameters:
 *	*s - string the substrings are located in
 *	c - delimiter character
+*	except - character that pauses counting when encountering 'c'
 * Returns:
 *	How many substrings are in the substring
 */
@@ -19,13 +32,17 @@ static int	count_substrings(const char *s, char c, char except)
 	in_exception = 0;
 	while (*s)
 	{
-		if (*s != c && !in_substring)
+		if (*s != c && !in_substring && !in_exception)
 		{
 			in_substring = 1;
 			count++;
 		}
-		else if (*s == c)
+		else if (*s == c && !in_exception)
 			in_substring = 0;
+		if (*s == except && !in_exception)
+			in_exception = 1;
+		else if (*s == except && in_exception)
+			in_exception = 0;
 		s++;
 	}
 	return (count);
@@ -36,16 +53,23 @@ static int	count_substrings(const char *s, char c, char except)
 * Parameters:
 *	*s - string the substring is located in
 *	c - delimiter character
+*	except - 'c' char between 'except' chars are ignored
 * Returns:
 *	How many characters is in the substring
 */
-static int	sub_length(char const *s, char c)
+static int	sub_length(char const *s, char c, char except)
 {
 	int	len;
+	int	in_exception;
 
 	len = 0;
-	while (*s != c && *s != '\0')
+	in_exception = 0;
+	while (*s != '\0' && (*s != c || in_exception))
 	{
+		if (*s == except && in_exception)
+			in_exception = 0;
+		else if (*s == except && !in_exception)
+			in_exception = 1;
 		len++;
 		s++;
 	}
@@ -76,7 +100,7 @@ static void	*free_everything(char **mem, int i)
 *	Array of new strings resulting from the split
 *	NULL if the allocation fails
 */
-char	**ft_split(char const *s, char c, char except)
+char	**mod_split(char const *s, char c, char except)
 {
 	char		**strings;
 	int			sub_len;
@@ -93,7 +117,7 @@ char	**ft_split(char const *s, char c, char except)
 			s++;
 			continue ;
 		}
-		sub_len = sub_length(s, c);
+		sub_len = sub_length(s, c, except);
 		strings[i] = ft_substr(s, 0, sub_len);
 		if (strings[i] == NULL)
 			return (free_everything(strings, i));
