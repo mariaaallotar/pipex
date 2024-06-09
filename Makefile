@@ -25,7 +25,7 @@ SRCS = mod_split.c \
 OBJS = $(SRCS:.c=.o)
 
 CC = cc
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra -g
 RM = rm -rf
 
 all: $(LIBFT) $(NAME)
@@ -33,18 +33,19 @@ all: $(LIBFT) $(NAME)
 $(LIBFT):
 	make -C $(LIBFT_DIR)
 
-$(NAME): $(OBJS)
-	$(CC) $(OBJS) -o $(NAME)
+$(NAME): $(OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -L$(LIBFT_DIR) -lft
 
 %.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@
 
 clean:
+	make -C $(LIBFT_DIR) clean
 	$(RM) $(OBJS)
 
 fclean: clean
-	$(RM) $(NAME)
-
+	make -C $(LIBFT_DIR) clean
+	
 re: fclean all
 
 .PHONY: all clean fclean re

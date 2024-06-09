@@ -32,12 +32,12 @@ int	parse_path(char *envp[], t_pipex *s_pipex)
 	{
 		i++;
 	}
-	paths = ft_split((const char *) envp[i], ':');
+	paths = ft_split((const char *) (envp[i] + 5), ':');
 	i = 0;
 	while (paths[i] != NULL)
 	{
 		command_path = ft_strjoin(paths[i], s_pipex->command);
-		if (access(command_path, F_OK))
+		if (access(command_path, F_OK) == 0)
 		{
 			s_pipex->path = command_path;
 			return (1);
@@ -61,5 +61,14 @@ int	main(int argc, char *argv[], char *envp[])
 		return (0);
 	}
 	parse_command(argv[2], &s_pipex);
+
+	int i = 0;
+	while (s_pipex.command_w_flags[i] != NULL)
+	{
+		printf("%s\n", s_pipex.command_w_flags[i]);
+		i++;
+	}
+
 	parse_path(envp, &s_pipex);
+	printf("%s\n", s_pipex.path);
 }
