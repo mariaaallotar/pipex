@@ -22,8 +22,14 @@ char	**mod_split(char const *s, char c, char except);
 
 typedef struct s_pipex
 {
-	int		pipe_fds[2];
+	int		argc
+	char	*argv[]
 	char	*envp[];
+	int		infile_ok;
+	int		pipe_fds[2];
+	char	**paths;			//needs to be freed
+	char	**commands;
+	char	***commands_w_flags;
 }	t_pipex;
 
 #endif

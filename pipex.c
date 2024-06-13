@@ -10,7 +10,38 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-int	parse_path(char *envp[], t_pipex *s_pipex)
+int	pipex(int argc, char *argv[], char *envp[])
+{
+	int		pid;
+	int		i;
+
+	if (pipe(s_pipex.pipe_fds) == -1)
+	{
+		//handle error: piping failed
+	}
+	i = 0;
+	while (i < argc - 3)
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			handle_child_processes();
+			if (i == 0)
+				first_child_pipex()
+			else if (i < argc - 3 - 1)
+				middle_child_pipex()
+			else
+				last_child_pipex();
+		}
+		free_struct;
+		i++;
+	}
+	close(s_pipex.pipe_fds[0]);
+	close(s_pipex.pipe_fds[1]);
+	return (0);
+}
+
+int	parse_paths(t_pipex *s_pipex)
 {
 	char	**paths;
 	char	*command_path;
@@ -47,29 +78,44 @@ int	parse_path(char *envp[], t_pipex *s_pipex)
 	return (-1);
 }
 
-int	parse_command(char *command, t_pipex *s_pipex)
+int	parse_commands(t_pipex *s_pipex)
 {
-	s_pipex->command_w_flags = mod_split(command, ' ', '\'');
-	if (s_pipex->command_w_flags == NULL)
-		return (-1);
-	if (access(s_pipex->command_w_flags[0], X_OK) == 0)
-		s_pipex->path = s_pipex->command_w_flags[0]
-	s_pipex->command = s_pipex->command_w_flags[0];
+	int	i;
+
+	i = 0;
+	while (i < s_pipex->argc - 3)
+	{
+		s_pipex->command_w_flags[i] = mod_split(s_pipex->argv[i + 2], ' ', '\'');
+		if (s_pipex->command_w_flags[i] == NULL)
+		{
+			//handle error: malloc failed
+		}
+		if (access(s_pipex->command_w_flags[i][0], X_OK) == 0)
+			s_pipex->paths[i] = s_pipex->command_w_flags[i][0];
+		s_pipex->commands[i] = s_pipex->command_w_flags[i][0];
+		i++;
+	}
 	return (1);
 }
 
-int	parse_args(char *file, char *command, char *envp[], t_pipex *s_pipex)
+int	parse_args(t_pipex *s_pipex)
 {
+	if (access(argv[1], F_OK) == -1)
+	{
+		s_pipex->infile_ok = 0;
+		//handle error: no such file or directory 
+	}
 	if (access(argv[1], R_OK) == -1)
 	{
-		//TODO: handle error
+		s_pipex->infile_ok = 0;
+		//handle error: read permission for infile denied
 	}
-	if (parse_command(command, &s_pipex) == -1)
+	if (parse_commands(&s_pipex) == -1)
 	{
 		//TODO: handle error
 	}
-	print_command(&s_pipex); //only for debugging
-	if (parse_path(envp, &s_pipex) == -1)
+	// print_command(&s_pipex); //only for debugging
+	if (parse_paths(&s_pipex) == -1)
 	{
 		//TODO: handle error
 	}
@@ -78,42 +124,30 @@ int	parse_args(char *file, char *command, char *envp[], t_pipex *s_pipex)
 	printf("%s\n", s_pipex.path);		//only for debugging
 }
 
+void	init_s_pipex(int argc, char *argv[], char *envp[], t_pipex *s_pipex)
+{
+	s_pipex->argc = argc;
+	s_pipex->argv = argv;
+	s_pipex->envp = envp;
+	s_pipex->infile_ok = 1;
+	s_pipex->paths = NULL;			//needs to be freed
+	s_pipex->commands = NULL;
+	s_pipex->commands_w_flags = NULL;
+}
+
 //TODO: remove this inclusion
 #include <stdio.h>
 
 int	main(int argc, char *argv[], char *envp[])
 {
 	t_pipex	s_pipex;
-	int		pid;
-	int		i;
 
 	if (argc != 5)
 	{
 		printf("This progam needs exactly four arguments."); //change to ft_printf
 		return (1);
 	}
-	if (access(argv[1], R_OK) == -1)
-	{
-		//handle error
-	}
-	if (pipe(s_pipex.pipe_fds) == -1)
-	{
-		//handle error
-	}
-	i = 0;
-	while (i < argc -3)
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			if (i == 0)
-				parse_args(argv[1], argv[2], envp, &s_pipex);
-			else
-				parse_args(argv[4], argv[3], envp, &s_pipex);
-		}
-		free_struct;
-		i++;
-	}
-	close(s_pipex.pipe_fds[0]);
-	close(s_pipex.pipe_fds[1]);
+	init_s_pipex(argc, argv, envp, &s_pipex);
+	parse_args(&s_pipex);
+	return (pipex());
 }
