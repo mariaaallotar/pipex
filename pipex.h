@@ -25,6 +25,7 @@ typedef struct s_pipex
 	char	**envp;
 	int		infile_ok;
 	int		pipe_fds[2];
+	int		read_from_fd;
 	char	**paths;			//needs to be freed
 	char	**cmds;
 	char	***cmds_w_flags;

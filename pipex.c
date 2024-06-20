@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: maheleni <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/12 12:51:07 by maheleni          #+#    #+#             */
-/*   Updated: 2024/06/12 12:51:09 by maheleni         ###   ########.fr       */
+/*   Created: 2024/06/20 14:42:19 by maheleni          #+#    #+#             */
+/*   Updated: 2024/06/20 14:42:21 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,77 +15,50 @@
 //TODO: remove this inclusion
 #include <stdio.h>
 
-// int	pipex(int argc, char *argv[], char *envp[])
-// {
-// 	int		pid;
-// 	int		i;
-
-// 	if (pipe(s_pipex.pipe_fds) == -1)
-// 	{
-// 		//handle error: piping failed
-// 	}
-// 	i = 0;
-// 	while (i < argc - 3)
-// 	{
-// 		pid = fork();
-// 		if (pid == 0)
-// 		{
-// 			handle_child_processes();
-// 			if (i == 0)
-// 				first_child_pipex()
-// 			else if (i < argc - 3 - 1)
-// 				middle_child_pipex()
-// 			else
-// 				last_child_pipex();
-// 		}
-// 		free_struct;
-// 		i++;
-// 	}
-// 	close(s_pipex.pipe_fds[0]);
-// 	close(s_pipex.pipe_fds[1]);
-// 	return (0);
-// }
-
-/*
-* Initializes the struct used in pipex
-*/
-static void	init_s_pipex(int argc, char *argv[], char *envp[], t_pipex *s_pipex)
+static void first_child_pipex(t_pipex s_pipex, int i)
 {
-	s_pipex->argc = argc;
-	s_pipex->argv = argv;
-	s_pipex->envp = envp;
-	s_pipex->infile_ok = 1;
-	s_pipex->paths = (char **) malloc ((argc - 3) * sizeof(char *)); //needs to be freed
-	if (s_pipex->paths == NULL)
-	{
-		//TODO: handle error: malloc failed
-	}
-	s_pipex->cmds = (char **) malloc ((argc - 3 + 1) * sizeof(char *));
-	if (s_pipex->cmds == NULL)
-	{
-		//TODO: handle error: malloc failed
-	}
-	s_pipex->cmds[argc - 3] = NULL;
-	s_pipex->cmds_w_flags = (char ***) malloc ((argc - 3 + 1) * sizeof(char *));
-	if (s_pipex->cmds_w_flags == NULL)
-	{
-		//TODO: handle error: malloc failed
-	}
-	s_pipex->cmds_w_flags[argc - 3] = NULL;
+    dup2(STDIN_FILENO, s_pipex->argv[1]);
+    dup2(STDOUT_FILENO, s_pipex->fds[1]);
+    // close();     //what to close?
+    execve(s_pipex->paths[i], (const char)s_pipex->cmds_w_flags[i], s_pipex->envp);
 }
 
-
-
-int	main(int argc, char *argv[], char *envp[])
+static void middle_child_pipex(t_pipex s_pipex, int i)
 {
-	t_pipex	s_pipex;
+    dup2(STDIN_FILENO, s_pipex->fds[0]);
+    dup2(STDOUT_FILENO, fds[1]);
+    // close();     //what to close?
+    execve(s_pipex->paths[i], (const char)s_pipex->cmds_w_flags[i], s_pipex->envp);
+}
 
-	if (argc < 5)
+int	pipex(t_pipex s_pipex)
+{
+	int		pid;
+	int		i;
+
+	if (pipe(s_pipex.pipe_fds) == -1)
 	{
-		printf("This progam needs four or more arguments."); //change to ft_printf
-		return (1);
+		//handle error: piping failed
 	}
-	init_s_pipex(argc, argv, envp, &s_pipex);
-	parse_args(&s_pipex);
-	// return (pipex());
+	i = 0;
+	while (i < argc - 3)
+	{
+        s_pipex->read_from_fd = dup(s_pipex->fds[0]);
+		pid = fork();
+		if (pid == 0)
+		{
+			// handle_child_processes();    //what was I thinking here?
+			if (i == 0)
+				first_child_pipex(s_pipex, i)
+			else if (i < argc - 3 - 1)
+				middle_child_pipex(s_pipex, i)
+			else
+				last_child_pipex(s_pipex, i);
+		}
+		i++;
+	}
+	close(s_pipex.pipe_fds[0]);
+	close(s_pipex.pipe_fds[1]);
+    free_struct;
+	return (0);
 }

@@ -53,12 +53,14 @@ static int	find_path(char *command, char **env_paths, t_pipex *s_pipex, int inde
 */
 static int	all_commands_paths(t_pipex *s_pipex)
 {
-	int	i;
+	int		i;
+	char	**paths;
 
 	i = 0;
+	paths = s_pipex->paths;
 	while (s_pipex->cmds[i] != NULL)
 	{
-		if (access(s_pipex->paths[i], F_OK) != 0)
+		if (access(paths[i], F_OK) != 0 || ft_strchr(paths[i], '/') == NULL)	//have both or just '/'?
 			return (0);
 		i++;
 	}
@@ -86,7 +88,7 @@ static int	parse_paths(t_pipex *s_pipex)
 	i = 0;
 	while (s_pipex->cmds[i] != NULL)
 	{
-		if (access(s_pipex->paths[i], F_OK) == 0)
+		if (ft_strchr(s_pipex->cmds[i], '/') != NULL)
 			continue ;
 		else if (find_path(s_pipex->cmds[i], env_paths, s_pipex, i) == -1)
 		{
