@@ -18,19 +18,19 @@
 # include <fcntl.h>
 # include "libft/libft.h"
 
-char	**mod_split(char const *s, char c, char except);
-int		parse_args(t_pipex *s_pipex);
-
 typedef struct s_pipex
 {
-	int		argc
-	char	*argv[]
-	char	*envp[];
+	int		argc;
+	char	**argv;
+	char	**envp;
 	int		infile_ok;
 	int		pipe_fds[2];
 	char	**paths;			//needs to be freed
 	char	**cmds;
-	char	***cmd_w_flags;
+	char	***cmds_w_flags;
 }	t_pipex;
+
+char	**mod_split(char const *s, char c, char except);
+int		parse_args(t_pipex *s_pipex);
 
 #endif
