@@ -15,34 +15,50 @@
 //TODO: remove this inclusion
 #include <stdio.h>
 
-static void first_child_pipex(t_pipex *s_pipex, int i)
+static void first_child_pipex(t_pipex *s_pipex)
 {
 	int infile;
 
+	printf("In first child\n");
 	infile = open(s_pipex->argv[1], O_RDONLY);
-    dup2(STDIN_FILENO, infile);
-    dup2(STDOUT_FILENO, s_pipex->pipe_fds[1]);
+	dup2(infile, STDIN_FILENO);
+	dup2(s_pipex->pipe_fds[1], STDOUT_FILENO);
     // close();     //what to close?
-    execve(s_pipex->paths[i], (const char *)s_pipex->cmds_w_flags[i], s_pipex->envp);
+	int i = 0;
+	while(s_pipex->cmds_w_flags[0][i] != NULL)
+	{
+		printf("%s\n", s_pipex->cmds_w_flags[0][i]);
+		i++;
+	}
+    if (execve(s_pipex->paths[0], (char * const*)s_pipex->cmds_w_flags[0], s_pipex->envp) == -1)
+	{
+		perror("execve");
+	}
 }
 
 static void middle_child_pipex(t_pipex *s_pipex, int i)
 {
-    dup2(STDIN_FILENO, s_pipex->read_from_fd);
-    dup2(STDOUT_FILENO, s_pipex->pipe_fds[1]);
+	printf("In middle child\n");
+	dup2(s_pipex->read_from_fd, STDIN_FILENO);
+	dup2(s_pipex->pipe_fds[1], STDOUT_FILENO);
     // close();     //what to close?
-    execve(s_pipex->paths[i], (const char *)s_pipex->cmds_w_flags[i], s_pipex->envp);
+    execve(s_pipex->paths[i], (char * const*)s_pipex->cmds_w_flags[i], s_pipex->envp);
 }
 
 static void last_child_pipex(t_pipex *s_pipex, int i)
 {
-	int	outfile;
+	int		outfile;
+	int		argc;
+	char	*outfile_name;
 
-	outfile = open(s_pipex->argv[s_pipex->argc - 1], O_WRONLY);	//should also create that file if it does not exist
-    dup2(STDIN_FILENO, s_pipex->read_from_fd);
-    dup2(STDOUT_FILENO, outfile);
+	printf("In last child\n");
+	argc = s_pipex->argc;
+	outfile_name = s_pipex->argv[argc - 1];
+	outfile = open(outfile_name, O_CREAT | O_WRONLY, 0644);	//check that the permissions are correct
+    dup2(s_pipex->read_from_fd, STDIN_FILENO);
+	dup2(outfile, STDOUT_FILENO);
     // close();     //what to close?
-    execve(s_pipex->paths[i], (const char *)s_pipex->cmds_w_flags[i], s_pipex->envp);
+    execve(s_pipex->paths[i], (char * const*)s_pipex->cmds_w_flags[i], s_pipex->envp);
 }
 
 int	pipex(t_pipex *s_pipex)
@@ -68,7 +84,7 @@ int	pipex(t_pipex *s_pipex)
 		if (pid == 0)
 		{
 			if (i == 0)
-				first_child_pipex(s_pipex, i);
+				first_child_pipex(s_pipex);
 			else if (i < argc - 3 - 1)
 			{
 				middle_child_pipex(s_pipex, i);

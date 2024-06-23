@@ -24,11 +24,12 @@ static void	init_s_pipex(int argc, char *argv[], char *envp[], t_pipex *s_pipex)
 	s_pipex->argv = argv;
 	s_pipex->envp = envp;
 	s_pipex->infile_ok = 1;
-	s_pipex->paths = (char **) malloc ((argc - 3) * sizeof(char *)); //needs to be freed
+	s_pipex->paths = (char **) malloc ((argc - 3 + 1) * sizeof(char *)); //needs to be freed
 	if (s_pipex->paths == NULL)
 	{
 		//TODO: handle error: malloc failed
 	}
+	s_pipex->paths[argc - 3] = NULL;
 	s_pipex->cmds = (char **) malloc ((argc - 3 + 1) * sizeof(char *));
 	if (s_pipex->cmds == NULL)
 	{
@@ -56,5 +57,5 @@ int	main(int argc, char *argv[], char *envp[])
 	}
 	init_s_pipex(argc, argv, envp, &s_pipex);
 	parse_args(&s_pipex);
-	// return (pipex(&s_pipex));
+	pipex(&s_pipex);
 }

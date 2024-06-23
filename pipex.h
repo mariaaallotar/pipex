@@ -33,5 +33,6 @@ typedef struct s_pipex
 
 char	**mod_split(char const *s, char c, char except);
 int		parse_args(t_pipex *s_pipex);
+int		pipex(t_pipex *s_pipex);
 
 #endif
