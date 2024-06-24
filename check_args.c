@@ -27,12 +27,14 @@ static int	find_path(char *command, char **env_paths, t_pipex *s_pipex, int inde
 		path = ft_strjoin(env_paths[i], "/");
 		if (path == NULL)
 		{
-			//TODO; handle error
+			perror("malloc");
+			exit(EXIT_FAILURE);
 		}
 		command_path = ft_strjoin(path, command);
 		if (command_path == NULL)
 		{
-			//TODO; handle error
+			perror("malloc");
+			exit(EXIT_FAILURE);
 		}
 		free(path);
 		if (access(command_path, F_OK) == 0)
@@ -146,7 +148,7 @@ static void print_commands(t_pipex *s_pipex)
 	int j;
 
 	i = 0;
-	printf("All commands and all its flags on seperate lines:\n\n");
+	printf("\nAll commands and all its flags on seperate lines:\n");
 	printf("First command and its flags:\n");
 	while (s_pipex->cmds_w_flags[i] != NULL)
 	{
