@@ -16,7 +16,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <fcntl.h>
-# include<sys/wait.h>
+# include <sys/wait.h>
+# include <errno.h>
 # include "libft/libft.h"
 
 typedef struct s_pipex
@@ -33,7 +34,7 @@ typedef struct s_pipex
 }	t_pipex;
 
 char	**mod_split(char const *s, char c, char except);
-int		parse_args(t_pipex *s_pipex);
-int		pipex(t_pipex *s_pipex);
+int		check_args(t_pipex *s_pipex);
+void	pipex(t_pipex *s_pipex);
 
 #endif

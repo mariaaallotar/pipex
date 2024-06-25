@@ -133,13 +133,13 @@ static void print_paths(t_pipex *s_pipex)
 	int i;
 
 	i = 0;
-	printf("The path to every command:\n\n");	//change to ft_printf
+	// printf("The path to every command:\n\n");	//change to ft_printf
 	while (s_pipex->paths[i] != NULL)
 	{
-		printf("%s\n", s_pipex->paths[i]); //change to ft_printf
+		// printf("%s\n", s_pipex->paths[i]); //change to ft_printf
 		i++;
 	}
-	printf("\n"); //change to ft_printf
+	// printf("\n"); //change to ft_printf
 }
 
 static void print_commands(t_pipex *s_pipex)
@@ -148,28 +148,28 @@ static void print_commands(t_pipex *s_pipex)
 	int j;
 
 	i = 0;
-	printf("\nAll commands and all its flags on seperate lines:\n");
-	printf("First command and its flags:\n");
+	// printf("\nAll commands and all its flags on seperate lines:\n");
+	// printf("First command and its flags:\n");
 	while (s_pipex->cmds_w_flags[i] != NULL)
 	{
 		if (i != 0)
-			printf("Next command and its flags:\n");
+			// printf("Next command and its flags:\n");
 		j = 0;
 		while (s_pipex->cmds_w_flags[i][j] != NULL)
 		{
-			printf("%s\n", s_pipex->cmds_w_flags[i][j]);
+			// printf("%s\n", s_pipex->cmds_w_flags[i][j]);
 			j++;
 		}
 		i++;
 	}
-	printf("\n");
+	// printf("\n");
 }
 
 /*
 * Checks that infile exists and we have read permission
 * Calls for functons to parse commads and paths
 */
-int	parse_args(t_pipex *s_pipex)
+int	check_args(t_pipex *s_pipex)
 {
 	if (access(s_pipex->argv[1], F_OK) == -1)
 	{

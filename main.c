@@ -56,6 +56,6 @@ int	main(int argc, char *argv[], char *envp[])
 		return (1);
 	}
 	init_s_pipex(argc, argv, envp, &s_pipex);
-	parse_args(&s_pipex);
+	check_args(&s_pipex);
 	pipex(&s_pipex);
 }
