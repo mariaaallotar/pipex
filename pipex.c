@@ -62,7 +62,7 @@ static void last_child_pipex(t_pipex *s_pipex, int i)
 		outfile = open(outfile_name, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 		if (outfile == -1)
 		{
-			exit(errno);
+			exit(1);
 		}
 		dup2(outfile, STDOUT_FILENO);
 		close(outfile);
@@ -71,7 +71,10 @@ static void last_child_pipex(t_pipex *s_pipex, int i)
     close(s_pipex->read_from_fd);
 	perror("Error before last execve");
 	if (execve(s_pipex->paths[i], (char * const*)s_pipex->cmds_w_flags[i], s_pipex->envp) == -1)
-		exit(1);
+	{
+		print("Errno in last child: %d\n", errno);
+		exit(errno);
+	}
 }
 
 void	pipex(t_pipex *s_pipex)
@@ -124,7 +127,6 @@ void	pipex(t_pipex *s_pipex)
 	//free_struct;
 	if (WIFEXITED(exit_status))
 	{
-		printf("Last proocess exited with status = %d\n", WEXITSTATUS(exit_status));
 		perror("Last error in parent");
         exit (WEXITSTATUS(exit_status));
 	}
