@@ -24,19 +24,6 @@
 # include <errno.h>
 # include "libft/libft.h"
 
-typedef struct s_pipex
-{
-	int		argc;
-	char	**argv;
-	char	**envp;
-	int		infile_ok;
-	int		pipe_fds[2];
-	int		read_from_fd;
-	char	**paths;			//needs to be freed
-	char	**cmds;
-	char	***cmds_w_flags;
-}	t_pipex;
-
 char	**mod_split(char const *s, char c, char except);
 void	ft_putstr_fd(char *s, int fd);
 
