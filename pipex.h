@@ -13,6 +13,10 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
+//ONLY FOR DEBUGGING
+#include <stdio.h>
+
+
 # include <stdlib.h>
 # include <unistd.h>
 # include <fcntl.h>
@@ -34,7 +38,6 @@ typedef struct s_pipex
 }	t_pipex;
 
 char	**mod_split(char const *s, char c, char except);
-int		check_args(t_pipex *s_pipex);
-void	pipex(t_pipex *s_pipex);
+void	ft_putstr_fd(char *s, int fd);
 
 #endif

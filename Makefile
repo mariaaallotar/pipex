@@ -20,14 +20,13 @@ LIBFT_DIR = libft
 
 SRCS = mod_split.c \
 	pipex.c \
-	check_args.c \
-	main.c
+	check_args.c
 
 
 OBJS = $(SRCS:.c=.o)
 
-CC = cc
-CFLAGS = -Wall -Werror -Wextra -g
+CC = cc -g
+#CFLAGS = -Wall -Werror -Wextra -g
 RM = rm -rf
 
 all: $(LIBFT) $(NAME)

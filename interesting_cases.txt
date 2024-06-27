@@ -1,0 +1,33 @@
+//does not create outfile
+c1r6p6% < pipex_old.c command | command > outfile
+zsh: redirection with no command
+zsh: redirection with no command
+c1r6p6% 
+[1]    exit 1     command < pipex_old.c
+
+//creates outfile
+c1r6p6% < pipex_old.c l | l > outfile
+zsh: command not found: l
+zsh: command not found: l
+
+//creates outfile
+c1r6p6% < pipex_old.c command | cat > outfile 
+zsh: redirection with no command
+
+//creates outfile, but it is empty
+c1r4p1% < pipex_old cat -e | cat -e > test
+zsh: no such file or directory: pipex_old
+
+//creates outfile, but it is empty
+c1r4p1% < pipex_old ls | cat -e > test
+zsh: no such file or directory: pipex_old
+
+//BUT//
+c1r4p1% rm test 
+c1r4p1% < pipex_old ls | cat -e > test
+zsh: no such file or directory: pipex_old
+c1r4p1% cat test
+c1r4p1% ls
+check_args.c	   interesting_cases.txt  main.c    mod_split.c  pipex	  pipex.h      strace_output.txt
+file_without_perm  libft		  Makefile  outfile	 pipex.c  pipex_old.c
+
