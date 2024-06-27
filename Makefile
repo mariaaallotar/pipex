@@ -25,8 +25,8 @@ SRCS = mod_split.c \
 
 OBJS = $(SRCS:.c=.o)
 
-CC = cc -g
-#CFLAGS = -Wall -Werror -Wextra -g
+CC = cc
+CFLAGS = -Wall -Werror -Wextra -g
 RM = rm -rf
 
 all: $(LIBFT) $(NAME)
