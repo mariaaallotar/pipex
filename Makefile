@@ -20,7 +20,6 @@ LIBFT_DIR = libft
 
 SRCS = mod_split.c \
 	pipex.c \
-	check_args.c
 
 
 OBJS = $(SRCS:.c=.o)

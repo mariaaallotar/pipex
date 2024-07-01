@@ -14,8 +14,24 @@
 
 void	error()
 {
-	perror(NULL);
+	if (errno == 127)
+		ft_putstr_fd("Command not found\n", 2);
+	else
+		perror(NULL);
 	exit(errno);
+}
+
+void	free_str_arr(char **str_arr)
+{
+	int	i;
+
+	i = 0;
+	while(str_arr[i] != NULL)
+	{
+		free(str_arr[i]);
+		i++;
+	}
+	free(str_arr);
 }
 
 static char *find_path(char *cmd, char *envp[])
@@ -48,11 +64,15 @@ static char *find_path(char *cmd, char *envp[])
 		cmd_path = ft_strjoin(path, cmd);
 		free(path);
 		if (access(cmd_path, F_OK) == 0)
+        {
+            free_str_arr(env_paths);
 			return (cmd_path);
+        }
 		free(cmd_path);
 		i++;
 	}
-    ft_putstr_fd("Command not found\n", 2);
+    errno = 127;
+    free_str_arr(env_paths);
 	return (NULL);
 }
 
@@ -60,28 +80,23 @@ void    execute(char *cmd, char *envp[])
 {
 	char	**cmd_array;
 	char	*path;
-    int 	i;
 	
     if (*cmd == '\0')
     {
-        ft_putstr_fd("Command not found\n", 2);
+		errno = 127;
         error();
     }
 	cmd_array = mod_split(cmd, ' ', '\'');
 	path = find_path(cmd_array[0], envp);
-    i = 0;
 	if (path == NULL)
 	{
-		while (cmd_array[i])
-        {
-			free(cmd_array[i]);
-            i++;
-        }
-		free(cmd_array);
+		free_str_arr(cmd_array);
 		error();
 	}
 	if (execve(path, cmd_array, envp) == -1)
     {
+		free(path);
+		free_str_arr(cmd_array);
 		error();
     }
 }
