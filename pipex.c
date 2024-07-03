@@ -12,13 +12,17 @@
 
 #include "pipex.h"
 
-void	error()
+void	error(char *str)
 {
+    dup2(STDERR_FILENO, STDOUT_FILENO);
 	if (errno == 127)
-		ft_putstr_fd("Command not found\n", 2);
+    {
+        ft_printf("Command not found: %s\n", str);
+        exit(errno);
+    }
 	else
-		perror(NULL);
-	exit(errno);
+	    ft_printf("%s: %s\n", strerror(errno), str);
+	exit(1);
 }
 
 void	free_str_arr(char **str_arr)
@@ -34,6 +38,18 @@ void	free_str_arr(char **str_arr)
 	free(str_arr);
 }
 
+int is_dir(char *str)
+{
+    while(*str != '\0')
+    {
+        str++;
+    }
+    str--;
+    if (*str == '/')
+        return (1);
+    return (0);
+}
+
 static char *find_path(char *cmd, char *envp[])
 {
 	char	**env_paths;
@@ -43,10 +59,11 @@ static char *find_path(char *cmd, char *envp[])
 
     if (access(cmd, F_OK) == 0)
     {
-        if (access(cmd, X_OK) == 0)
+        if (is_dir(cmd))
+            errno = EISDIR;
+        else if (access(cmd, X_OK) == 0)
             return (cmd);
-        else
-            return (NULL);
+        return (NULL);
     }
 	i = 0;
 	while (envp[i] != NULL && ft_strnstr(envp[i], "PATH=", 5) == NULL)
@@ -84,20 +101,20 @@ void    execute(char *cmd, char *envp[])
     if (*cmd == '\0')
     {
 		errno = 127;
-        error();
+        error("");
     }
 	cmd_array = mod_split(cmd, ' ', '\'');
 	path = find_path(cmd_array[0], envp);
 	if (path == NULL)
 	{
 		free_str_arr(cmd_array);
-		error();
+		error(cmd);
 	}
 	if (execve(path, cmd_array, envp) == -1)
     {
 		free(path);
 		free_str_arr(cmd_array);
-		error();
+		error(NULL);
     }
 }
 
@@ -108,8 +125,7 @@ void child_process(char *argv[], char *envp[], int fds[])
     infile = open(argv[1], O_RDONLY);
     if (infile == -1)
     {
-        perror(NULL);
-        exit(errno);
+        error(argv[1]);
     }
     dup2(infile, STDIN_FILENO);
     close(infile);
@@ -122,7 +138,7 @@ void child_process(char *argv[], char *envp[], int fds[])
 void	parent_process(char *argv[], char *envp[], int fds[], int outfile)
 {
 	if (outfile == -1)
-		exit(1);
+		exit(50);
     dup2(outfile, STDOUT_FILENO);
 	close(outfile);
     dup2(fds[0], STDIN_FILENO);
@@ -135,26 +151,32 @@ int main(int argc, char *argv[], char *envp[])
 {
     int outfile;
     int fds[2];
-    int pid;
+    int pids[2];
     int status;
 
     if (argc == 5)
     {
         outfile = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
         if (outfile == -1)
-            perror(NULL);
+            error(argv[argc - 1]);
         if (pipe(fds) == -1)
-            error();
-        pid = fork();
-        if (pid == -1)
-            error();
-        else if (pid == 0)
+            error(NULL);
+        pids[0] = fork();
+        if (pids[0] == -1)
+            error(NULL);
+        else if (pids[0] == 0)
             child_process(argv, envp, fds);
-        wait(&status);
-        parent_process(argv, envp, fds, outfile);
-        return (EXIT_SUCCESS);
+        pids[1] = fork();
+        if (pids[1] == -1)
+            error(NULL);
+        else if (pids[1] == 0)
+            parent_process(argv, envp, fds, outfile);
+        waitpid(pids[0], &status, 0);
+        // waitpid(pids[1], &status, 0);    why not wait for this as well?
+        exit (status);
+        //need waitpid for the exitcode of last_child, but cannot have both waitpids
     }
-    ft_putstr_fd("Usage: ./pipex <file1> <cmd1> <cmd2> <file2>\n", 1);
-    ft_putstr_fd("Ex: ./pipex infile.txt \"ls -l\" \"wc\" outfile.txt\n", 1);
-    return (EXIT_SUCCESS);
+    ft_printf("Usage: ./pipex <file1> <cmd1> <cmd2> <file2>\n");
+    ft_printf("Ex: ./pipex infile.txt \"ls -l\" \"wc\" outfile.txt\n");
+    exit (EXIT_SUCCESS);
 }

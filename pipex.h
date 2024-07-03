@@ -22,6 +22,7 @@
 # include <fcntl.h>
 # include <sys/wait.h>
 # include <errno.h>
+# include <string.h>
 # include "libft/libft.h"
 
 char	**mod_split(char const *s, char c, char except);
