@@ -22,6 +22,10 @@ void	error(char *str)
     }
 	else
 	    ft_printf("%s: %s\n", strerror(errno), str);
+    if (errno == EACCES || errno == EISDIR)
+    {
+        exit(126);
+    }
 	exit(1);
 }
 
@@ -63,6 +67,11 @@ static char *find_path(char *cmd, char *envp[])
             errno = EISDIR;
         else if (access(cmd, X_OK) == 0)
             return (cmd);
+        return (NULL);
+    }
+    if (ft_strchr(cmd, '/') != NULL)
+    {
+        errno = ENOENT;
         return (NULL);
     }
 	i = 0;
@@ -138,7 +147,7 @@ void child_process(char *argv[], char *envp[], int fds[])
 void	parent_process(char *argv[], char *envp[], int fds[], int outfile)
 {
 	if (outfile == -1)
-		exit(50);
+		exit(1);
     dup2(outfile, STDOUT_FILENO);
 	close(outfile);
     dup2(fds[0], STDIN_FILENO);
@@ -151,29 +160,43 @@ int main(int argc, char *argv[], char *envp[])
 {
     int outfile;
     int fds[2];
-    int pids[2];
+    int pid;
     int status;
 
     if (argc == 5)
     {
         outfile = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
         if (outfile == -1)
-            error(argv[argc - 1]);
+            ft_printf("%s: %s\n", strerror(errno), argv[argc - 1]);
         if (pipe(fds) == -1)
             error(NULL);
-        pids[0] = fork();
-        if (pids[0] == -1)
+        pid = fork();
+        if (pid == -1)
             error(NULL);
-        else if (pids[0] == 0)
+        else if (pid == 0)
             child_process(argv, envp, fds);
-        pids[1] = fork();
-        if (pids[1] == -1)
-            error(NULL);
-        else if (pids[1] == 0)
-            parent_process(argv, envp, fds, outfile);
-        waitpid(pids[0], &status, 0);
-        // waitpid(pids[1], &status, 0);    why not wait for this as well?
-        exit (status);
+        waitpid(pid, &status, 0);
+        parent_process(argv, envp, fds, outfile);
+        exit(0);
+
+        // outfile = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+        // if (outfile == -1)
+        //     ft_printf("%s: %s\n", strerror(errno), argv[argc - 1]);
+        // if (pipe(fds) == -1)
+        //     error(NULL);
+        // pids[0] = fork();
+        // if (pids[0] == -1)
+        //     error(NULL);
+        // else if (pids[0] == 0)
+        //     child_process(argv, envp, fds);
+        // pids[1] = fork();
+        // if (pids[1] == -1)
+        //     error(NULL);
+        // else if (pids[1] == 0)
+        //     parent_process(argv, envp, fds, outfile);
+        // waitpid(pids[0], &status, 0);
+        // // waitpid(pids[1], &status, 0);    //why not wait for this as well?
+        // exit (status);
         //need waitpid for the exitcode of last_child, but cannot have both waitpids
     }
     ft_printf("Usage: ./pipex <file1> <cmd1> <cmd2> <file2>\n");
