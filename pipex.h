@@ -26,6 +26,5 @@
 # include "libft/libft.h"
 
 char	**mod_split(char const *s, char c, char except);
-void	ft_putstr_fd(char *s, int fd);
 
 #endif
