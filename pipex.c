@@ -12,6 +12,27 @@
 
 #include "pipex.h"
 
+void    cmd_error(char *str)
+{
+    dup2(STDERR_FILENO, STDOUT_FILENO);
+	if (errno == 127)
+    {
+        ft_printf("Command not found: %s\n", str);
+        exit(errno);
+    }
+	else
+	    ft_printf("%s: %s\n", strerror(errno), str);
+    if (errno == EACCES || errno == EISDIR)
+    {
+        exit(126);
+    }
+    else if (ft_strchr(str, '/') != NULL)
+    {
+        exit (127);
+    }
+    exit(127);
+}
+
 void	error(char *str)
 {
     dup2(STDERR_FILENO, STDOUT_FILENO);
@@ -26,7 +47,11 @@ void	error(char *str)
     {
         exit(126);
     }
-	exit(1);
+    else if (ft_strchr(str, '/') != NULL)
+    {
+        exit (127);
+    }
+    exit(1);
 }
 
 void	free_str_arr(char **str_arr)
@@ -54,13 +79,34 @@ int is_dir(char *str)
     return (0);
 }
 
+static char *get_envp_path(char *envp[])
+{
+    int i;
+
+    i = 0;
+	while (envp[i] != NULL && ft_strnstr(envp[i], "PATH=", 5) == NULL)
+		i++;
+	if (envp[i] == NULL)
+	{
+        errno = ENOENT;
+        return (NULL);
+	}
+    return (envp[i]);
+}
+
 static char *find_path(char *cmd, char *envp[])
 {
+    char    *envp_path;
 	char	**env_paths;
     char    *path;
     char    *cmd_path;
 	int		i;
 
+    if (cmd == NULL)
+    {
+        errno = 127;
+        return (NULL);
+    }
     if (access(cmd, F_OK) == 0)
     {
         if (is_dir(cmd))
@@ -74,15 +120,13 @@ static char *find_path(char *cmd, char *envp[])
         errno = ENOENT;
         return (NULL);
     }
-	i = 0;
-	while (envp[i] != NULL && ft_strnstr(envp[i], "PATH=", 5) == NULL)
-		i++;
-	if (envp[i] == NULL)
-	{
+    envp_path = get_envp_path(envp);
+    if (envp_path == NULL)
+    {
         errno = ENOENT;
         return (NULL);
-	}
-	env_paths = ft_split((const char *) (envp[i] + 5), ':');
+    }
+	env_paths = ft_split((const char *) (envp_path + 5), ':');
 	i = 0;
 	while (env_paths[i])
 	{
@@ -110,14 +154,14 @@ void    execute(char *cmd, char *envp[])
     if (*cmd == '\0')
     {
 		errno = 127;
-        error("");
+        cmd_error("");
     }
 	cmd_array = mod_split(cmd, ' ', '\'');
 	path = find_path(cmd_array[0], envp);
 	if (path == NULL)
 	{
 		free_str_arr(cmd_array);
-		error(cmd);
+		cmd_error(cmd);
 	}
 	if (execve(path, cmd_array, envp) == -1)
     {
@@ -160,7 +204,7 @@ int main(int argc, char *argv[], char *envp[])
 {
     int outfile;
     int fds[2];
-    int pid;
+    int pids[2];
     int status;
 
     if (argc == 5)
@@ -170,34 +214,25 @@ int main(int argc, char *argv[], char *envp[])
             ft_printf("%s: %s\n", strerror(errno), argv[argc - 1]);
         if (pipe(fds) == -1)
             error(NULL);
-        pid = fork();
-        if (pid == -1)
+        pids[0] = fork();
+        if (pids[0] == -1)
             error(NULL);
-        else if (pid == 0)
+        else if (pids[0] == 0)
             child_process(argv, envp, fds);
-        waitpid(pid, &status, 0);
-        parent_process(argv, envp, fds, outfile);
-        exit(0);
-
-        // outfile = open(argv[argc - 1], O_WRONLY | O_TRUNC | O_CREAT, 0644);
-        // if (outfile == -1)
-        //     ft_printf("%s: %s\n", strerror(errno), argv[argc - 1]);
-        // if (pipe(fds) == -1)
-        //     error(NULL);
-        // pids[0] = fork();
-        // if (pids[0] == -1)
-        //     error(NULL);
-        // else if (pids[0] == 0)
-        //     child_process(argv, envp, fds);
-        // pids[1] = fork();
-        // if (pids[1] == -1)
-        //     error(NULL);
-        // else if (pids[1] == 0)
-        //     parent_process(argv, envp, fds, outfile);
-        // waitpid(pids[0], &status, 0);
-        // // waitpid(pids[1], &status, 0);    //why not wait for this as well?
-        // exit (status);
-        //need waitpid for the exitcode of last_child, but cannot have both waitpids
+        close(fds[1]);
+        pids[1] = fork();
+        if (pids[1] == -1)
+            error(NULL);
+        else if (pids[1] == 0)
+            parent_process(argv, envp, fds, outfile);
+        close(fds[0]);
+        waitpid(pids[0], &status, 0);
+        waitpid(pids[1], &status, 0);
+        if (WIFEXITED(status))
+        {
+            exit (WEXITSTATUS(status));
+        }
+        exit (EXIT_FAILURE);
     }
     ft_printf("Usage: ./pipex <file1> <cmd1> <cmd2> <file2>\n");
     ft_printf("Ex: ./pipex infile.txt \"ls -l\" \"wc\" outfile.txt\n");

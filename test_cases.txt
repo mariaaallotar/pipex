@@ -3,6 +3,7 @@ TODO:
     outfile a directory
     command as absolute path
     sleep 5 | sleep 5 (sleep only 5)
+    cmd as "command"
 
 
 normal:
@@ -151,3 +152,5 @@ Cmd1 is folder, valid cmd2:
     Expected:
         Is a directory
         exit: 0
+
+
