@@ -20,6 +20,9 @@ LIBFT_DIR = libft
 
 SRCS = mod_split.c \
 	pipex.c \
+	get_path.c \
+	error_handling.c \
+	child_processes.c
 
 
 OBJS = $(SRCS:.c=.o)
@@ -34,7 +37,7 @@ $(LIBFT):
 	make -C $(LIBFT_DIR)
 
 $(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -L$(LIBFT_DIR) -lft
+	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 
 %.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@

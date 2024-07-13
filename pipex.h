@@ -13,11 +13,8 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
-//ONLY FOR DEBUGGING
-#include <stdio.h>
-
-
 # include <stdlib.h>
+# include <stdio.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <sys/wait.h>
@@ -25,6 +22,12 @@
 # include <string.h>
 # include "libft/libft.h"
 
+void	first_child_process(char *argv[], char *envp[], int fds[]);
+void	last_child_process(char *argv[], char *envp[], int fds[]);
 char	**mod_split(char const *s, char c, char except);
+char	*get_path(char *cmd, char *envp[]);
+void	cmd_error(char *str);
+void	error(char *str);
+void	free_str_arr(char **str_arr);
 
 #endif

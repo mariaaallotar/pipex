@@ -90,23 +90,23 @@ static void	*free_everything(char **mem, int i)
 /**
 * Allocates and returns an array of strings obtained by splitting 's' using
 *	the character 'c' as a delimiter. 's' is split every time we encounter 'c',
-*	unless we are between the 'except' chars. 
+*	unless we are between the 'e' (=except) chars. 
 *	The array must end with a NULL pointer
 * Parameters:
 *	*s - string to be split
 *	c - delimiter character
-*	except - char that pauses splitting
+*	e - char that pauses splitting
 * Returns:
 *	Array of new strings resulting from the split
 *	NULL if the allocation fails
 */
-char	**mod_split(char const *s, char c, char except)
+char	**mod_split(char const *s, char c, char e)
 {
 	char		**strings;
 	int			sub_len;
 	int			i;
 
-	strings = (char **) malloc((count_substrings(s, c, except) + 1) * sizeof(char *));
+	strings = malloc((count_substrings(s, c, e) + 1) * sizeof(char *));
 	if (strings == NULL)
 		return (NULL);
 	i = 0;
@@ -117,7 +117,7 @@ char	**mod_split(char const *s, char c, char except)
 			s++;
 			continue ;
 		}
-		sub_len = sub_length(s, c, except);
+		sub_len = sub_length(s, c, e);
 		strings[i] = ft_substr(s, 0, sub_len);
 		if (strings[i] == NULL)
 			return (free_everything(strings, i));
