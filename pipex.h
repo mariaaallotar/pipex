@@ -13,13 +13,10 @@
 #ifndef PIPEX_H
 # define PIPEX_H
 
-# include <stdlib.h>
 # include <stdio.h>
-# include <unistd.h>
 # include <fcntl.h>
 # include <sys/wait.h>
 # include <errno.h>
-# include <string.h>
 # include "libft/libft.h"
 
 void	first_child_process(char *argv[], char *envp[], int fds[]);
