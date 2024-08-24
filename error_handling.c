@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error_handling.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maheleni <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:18:17 by maheleni          #+#    #+#             */
-/*   Updated: 2024/07/13 11:18:19 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/08/24 10:57:50 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,6 @@ void	cmd_error(char *str)
 	if (errno == EACCES || errno == EISDIR)
 	{
 		exit(126);
-	}
-	else if (ft_strchr(str, '/') != NULL)
-	{
-		exit (127);
 	}
 	exit(127);
 }
