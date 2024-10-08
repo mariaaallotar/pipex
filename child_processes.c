@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   child_processes.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: maheleni <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: maheleni <maheleni@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/13 11:16:21 by maheleni          #+#    #+#             */
-/*   Updated: 2024/07/13 11:16:23 by maheleni         ###   ########.fr       */
+/*   Updated: 2024/10/08 11:00:08 by maheleni         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	first_child_process(char *argv[], char *envp[], int fds[])
 	infile = open(argv[1], O_RDONLY);
 	if (infile == -1)
 	{
+		//this needs to close pipe
 		error(argv[1]);
 	}
 	dup2(infile, STDIN_FILENO);
@@ -62,7 +63,10 @@ void	last_child_process(char *argv[], char *envp[], int fds[])
 	outfile_name = argv[4];
 	outfile = open(outfile_name, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (outfile == -1)
+	{
+		//this needs to close pipe
 		error(outfile_name);
+	}
 	dup2(outfile, STDOUT_FILENO);
 	close(outfile);
 	dup2(fds[0], STDIN_FILENO);
